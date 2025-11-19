@@ -1,3 +1,3 @@
-document.getElementById('clickBtn').addEventListener('click', () => {
-  alert('ボタンが押されました！');
-});
+//document.getElementById('clickBtn').addEventListener('click', () => {
+//  alert('ボタンが押されました！');
+//});
