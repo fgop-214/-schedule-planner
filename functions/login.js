@@ -1,11 +1,9 @@
-// /functions/login.js
 export async function onRequestPost(context) {
   const { request, env } = context;
 
-  // --- JSON 取得 ---
   const { username, password } = await request.json();
 
-  // --- DB でユーザー検索 ---
+  // ユーザー検索
   const user = await env.DB.prepare(
     "SELECT * FROM users WHERE username = ? AND password = ?"
   ).bind(username, password).first();
@@ -17,10 +15,9 @@ export async function onRequestPost(context) {
     });
   }
 
-  // --- ログイン成功 → セッションクッキー発行 ---
+  // セッションクッキー発行
   const sessionValue = crypto.randomUUID();
-  
-  // ここでは簡単のため、session=<uuid> を Cookie にセットするだけ
+
   return new Response(JSON.stringify({ ok: true }), {
     headers: {
       "Content-Type": "application/json",
