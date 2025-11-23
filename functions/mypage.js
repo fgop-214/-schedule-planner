@@ -9,6 +9,6 @@ export async function onRequest(context) {
     return new Response("ログインしてください", { status: 401 });
   }
 　if (session){
-    location.href = "/afterlogin.html";
+    location.href = "/afterlogin";
   }
 }
