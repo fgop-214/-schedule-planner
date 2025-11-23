@@ -8,6 +8,7 @@ export async function onRequest(context) {
   if (!session) {
     return new Response("ログインしてください", { status: 401 });
   }
-
-  return new Response("あなた専用のページです！（サンプル）");
+　if (session){
+    location.href = "/mypage/html";
+  }
 }
