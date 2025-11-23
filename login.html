@@ -5,9 +5,17 @@
 </head>
 <body>
   <form id="loginForm">
-    <input name="username" placeholder="ユーザー名" id="username">
-    <input name="password" type="password" placeholder="パスワード" id="password">
-    <button id="button">ログイン</button>
+    <div class="UserDiv">
+      <input name="username" placeholder="ユーザー名" class="username">
+    </div>
+    
+    <div class="PassDiv">
+      <input name="password" type="password" placeholder="パスワード" class="password">
+    </div>
+    
+    <div class="RoginBtnDiv">
+      <button class="button">ログイン</button>
+    </div>
   </form>
 
   <script>
@@ -24,7 +32,7 @@
       const json = await res.json();
       if (json.ok) {
         alert("ログイン成功！");
-        location.href = "/mypage";
+        location.href = "/mypage/html";
       } else {
         alert("ログイン失敗");
       }
