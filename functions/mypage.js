@@ -8,5 +8,5 @@ export async function onRequest(context) {
   if (!session) {
     return new Response("ログインしてください", { status: 401 });
   }
-  return env.ASSETS.fetch("https://schedule-planner-8dn.pages.dev/afterlogin.html");
+  return env.ASSETS.fetch("/afterlogin.html");
 }
