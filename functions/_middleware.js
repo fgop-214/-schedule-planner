@@ -1,85 +1,81 @@
-import { jwt } from "@tsndr/cloudflare-worker-jwt";
+// --- JWT Utility (sign / verify) ---
+const encoder = new TextEncoder();
 
-/**
- * 全リクエストで実行されるミドルウェア
- * - env.JWT_SECRET を使って token を verify する想定
- * - 除外パス (public) を適宜編集してください
- */
+async function signJWT(payload, secret) {
+  const header = { alg: "HS256", typ: "JWT" };
+  const base64Header = btoa(JSON.stringify(header));
+  const base64Payload = btoa(JSON.stringify(payload));
 
-export async function onRequest(context) {
-  const { request, env } = context;
-  const url = new URL(request.url);
-  const path = url.pathname;
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
 
-  // -----------------------
-  // 1) 除外するパス一覧（公開したいもの）
-  // -----------------------
-  // 必要に応じてここに除外パターンを追加してください。
-  const PUBLIC_PATHS = [
-    "/login",
-    "/login.html",
-    "/register",
-    "/register.html",
-    "/favicon.ico",
-    "/robots.txt",
-    "/sitemap.xml",
-  ];
+  const signature = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    encoder.encode(`${base64Header}.${base64Payload}`)
+  );
 
-  // 静的アセット（拡張子で判定）を除外
-  const STATIC_EXTENSIONS = [
-    ".js", ".css", ".jpg", ".jpeg", ".png", ".gif", ".svg", ".ico", ".woff", ".woff2", ".map"
-  ];
+  const base64Signature = btoa(String.fromCharCode(...new Uint8Array(signature)));
+  return `${base64Header}.${base64Payload}.${base64Signature}`;
+}
 
-  // API エンドポイント（必要なら除外）
-  const PUBLIC_API_PREFIXES = ["/api/public", "/_next"]; // 必要なら変更
+async function verifyJWT(token, secret) {
+  const [headerB64, payloadB64, signatureB64] = token.split(".");
+  if (!headerB64 || !payloadB64 || !signatureB64) return null;
 
-  // 早期 return: 明示的な公開パス
-  if (PUBLIC_PATHS.includes(path)) {
-    return context.next();
-  }
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["verify"]
+  );
 
-  // 早期 return: 拡張子による静的アセット
-  for (const ext of STATIC_EXTENSIONS) {
-    if (path.endsWith(ext)) return context.next();
-  }
+  const data = encoder.encode(`${headerB64}.${payloadB64}`);
+  const signature = Uint8Array.from(atob(signatureB64), (c) => c.charCodeAt(0));
 
-  // 早期 return: public API / framework path 等
-  for (const pref of PUBLIC_API_PREFIXES) {
-    if (path.startsWith(pref)) return context.next();
-  }
+  const isValid = await crypto.subtle.verify("HMAC", key, signature, data);
+  if (!isValid) return null;
 
-  // -----------------------
-  // 2) Cookie から token を取得
-  // -----------------------
-  const cookieHeader = request.headers.get("Cookie") || "";
-  const token = cookieHeader.match(/token=([^;]+)/)?.[1];
-
-  // トークンがなければ login にリダイレクト
-  if (!token) {
-    // クエリにリダイレクト先を残しておくと UX が良い
-    const dest = encodeURIComponent(request.url);
-    return Response.redirect(`/login?redirect=${dest}`, 302);
-  }
-
-  // -----------------------
-  // 3) トークン検証（JWT の場合）
-  // -----------------------
   try {
-    // verify が true/false を返すか例外を投げるライブラリもあるのでawaitで扱う
-    const ok = await jwt.verify(token, env.JWT_SECRET);
-    if (!ok) {
-      // 無効なトークン
-      return Response.redirect(`/login?expired=1`, 302);
-    }
-
-    // オプション: デコードしてユーザ情報を context.data に入れる
-    const decoded = await jwt.decode(token);
-    context.data.user = decoded?.payload ?? null;
-
-    // 認証OK → 次へ（静的ファイル or 関数）
-    return context.next();
-  } catch (err) {
-    // 検証中にエラーが発生したら login へ
-    return Response.redirect(`/login?error=auth`, 302);
+    return JSON.parse(atob(payloadB64));
+  } catch (e) {
+    return null;
   }
 }
+
+
+// --- Middleware ---
+export default {
+  async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+
+    // 認証不要ページ
+    const publicPaths = ["/login", "/signup", "/styles.css"];
+    if (publicPaths.includes(url.pathname)) {
+      return ctx.next();
+    }
+
+    // Cookie から token 取得
+    const cookie = request.headers.get("Cookie") || "";
+    const token = cookie.match(/token=([^;]+)/)?.[1];
+
+    if (!token) {
+      return Response.redirect("/login", 302);
+    }
+
+    // JWT 検証
+    const decoded = await verifyJWT(token, env.JWT_SECRET);
+    if (!decoded) {
+      return Response.redirect("/login", 302);
+    }
+
+    // OK → 通過
+    return ctx.next();
+  },
+};
