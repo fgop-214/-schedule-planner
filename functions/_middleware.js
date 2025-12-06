@@ -1,5 +1,7 @@
 // --- JWT Utility (sign / verify) ---
 const encoder = new TextEncoder();
+const protectedPaths = ["/protected/mypage.html"];
+
 
 async function signJWT(payload, secret) {
   const header = { alg: "HS256", typ: "JWT" };
