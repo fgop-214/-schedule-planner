@@ -1,35 +1,66 @@
-import { jwt } from "@tsndr/cloudflare-worker-jwt";
+const encoder = new TextEncoder();
 
+// ---- JWT 生成（HMAC-SHA256） ----
+async function signJWT(payload, secret) {
+  const header = {
+    alg: "HS256",
+    typ: "JWT"
+  };
+
+  const headerB64 = btoa(JSON.stringify(header))
+    .replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
+
+  const payloadB64 = btoa(JSON.stringify(payload))
+    .replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
+
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+
+  const data = encoder.encode(`${headerB64}.${payloadB64}`);
+  const signature = await crypto.subtle.sign("HMAC", key, data);
+
+  const signatureB64 = btoa(String.fromCharCode(...new Uint8Array(signature)))
+    .replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
+
+  return `${headerB64}.${payloadB64}.${signatureB64}`;
+}
+
+// ---- login handler ----
 export async function onRequestPost(context) {
-  const { request } = context;
+  const { request, env } = context;
 
-  // クライアントから送られた JSON を読む
-  const body = await request.json();
-  const user = body.username;
-  const pass = body.password;
+  // JSON を受け取る
+  const { username, password } = await request.json();
 
-  // ★★ 本来は D1 でチェックするが、今はテスト用 ★★
-  if (user === "test" && pass === "pass") {
-    // トークン作成
-    const token = await jwt.sign({ user }, context.env.JWT_SECRET);
+  // ★ D1 でユーザー確認（あなたのコードを利用）
+  const user = await env.DB.prepare(
+    "SELECT * FROM users WHERE username = ? AND password = ?"
+  ).bind(username, password).first();
 
-    // Cookie に保存して返す
-    return new Response(JSON.stringify({ ok: true }), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        // Path=/ → 全ページで有効
-        // HttpOnly → JSから読み取れない（安全）
-        // Secure → https のみ
-        // SameSite=None → Cookie が fetch でも送られる
-        "Set-Cookie": `token=${token}; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=3600`
-      }
+  if (!user) {
+    return new Response(JSON.stringify({ ok: false }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" }
     });
   }
 
-  // ログイン失敗
-  return new Response(JSON.stringify({ ok: false }), {
-    status: 401,
-    headers: { "Content-Type": "application/json" }
+  // --- JWT 作成 ---
+  const token = await signJWT(
+    { username, iat: Date.now() / 1000 },
+    env.JWT_SECRET
+  );
+
+  // Cookie に保存
+  return new Response(JSON.stringify({ ok: true }), {
+    headers: {
+      "Content-Type": "application/json",
+      "Set-Cookie": `token=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=86400`
+    }
   });
 }
+
