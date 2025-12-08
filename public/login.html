@@ -33,7 +33,7 @@
     const json = await res.json();
     if (json.ok) {
       alert("ログイン成功！");
-      location.href = "/mypage";
+      location.href = "/protected/mypage";
     } else {
       alert("ログイン失敗");
     }
