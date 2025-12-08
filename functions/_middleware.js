@@ -48,3 +48,7 @@ export default {
     return ctx.next();
   },
 };
+
+console.log("middleware: path=", url.pathname);
+console.log("cookie=", cookie);
+console.log("token=", token);
