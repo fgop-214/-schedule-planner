@@ -15,13 +15,28 @@ export async function onRequestPost(context) {
     });
   }
 
-  // セッションクッキー発行
-  const sessionValue = crypto.randomUUID();
+  // ---- JWT 作成 ----
+  const header = btoa(JSON.stringify({ alg: "HS256", typ: "JWT" }));
+  const payload = btoa(JSON.stringify({ username: user.username }));
+
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(env.JWT_SECRET),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+
+  const data = new TextEncoder().encode(`${header}.${payload}`);
+  const signatureArray = new Uint8Array(await crypto.subtle.sign("HMAC", key, data));
+  const signature = btoa(String.fromCharCode(...signatureArray));
+
+  const token = `${header}.${payload}.${signature}`;
 
   return new Response(JSON.stringify({ ok: true }), {
     headers: {
       "Content-Type": "application/json",
-      "Set-Cookie": `session=${sessionValue}; Path=/; HttpOnly; Secure; SameSite=Lax`
+      "Set-Cookie": `token=${token}; Path=/; HttpOnly; Secure; SameSite=Lax`
     }
   });
 }
