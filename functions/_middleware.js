@@ -1,17 +1,15 @@
-export const onRequest = async ({ request, env, next }) => {
+export const onRequest = async ({ request, next }) => {
   const url = new URL(request.url);
 
-  // 認証が必要なパス
   const protectedPaths = ['/dashboard.html', '/auth'];
 
-  const session = request.headers.get("Cookie") || "";
-  const user = session.match(/user=([^;]+)/)?.[1];
+  const cookie = request.headers.get("Cookie") || "";
+  const username = cookie.match(/user=([^;]+)/)?.[1];
 
-  // 認証が必要なのに Cookie が無い → ログインへ
-  if (protectedPaths.includes(url.pathname) && !user) {
+  // 保護されたページにアクセスしているのに Cookie 無し → ログインへ
+  if (protectedPaths.includes(url.pathname) && !username) {
     return Response.redirect("/index.html");
   }
 
-  // OK
   return next();
 };
