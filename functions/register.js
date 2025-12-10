@@ -12,7 +12,7 @@ export async function onRequestPost({ request, env }) {
       "INSERT INTO users (username, password_hash) VALUES (?1, ?2)"
     ).bind(username, password_hash).run();
   } catch (e) {
-    return new Response("ユーザー名が重複しています", { status: 400 });
+    return new Response("そのユーザー名は既に使われています", { status: 400 });
   }
 
   return Response.redirect("/index.html");
