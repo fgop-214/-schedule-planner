@@ -1,8 +1,22 @@
 <!DOCTYPE html>
 <html>
+<head>
+  <meta charset="utf-8" />
+  <title>ダッシュボード</title>
+</head>
 <body>
   <h1>ダッシュボード（ログイン済）</h1>
-  <p>ここにユーザー専用コンテンツ。</p>
+  <p id="hello"></p>
+
   <a href="/logout">ログアウト</a>
+
+<script>
+(async () => {
+  const res = await fetch('/auth');
+  const data = await res.json();
+  document.getElementById('hello').textContent =
+    `こんにちは、${data.username} さん！`;
+})();
+</script>
 </body>
 </html>
