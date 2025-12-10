@@ -1,44 +1,12 @@
 <!DOCTYPE html>
 <html>
-<head>
- <link rel="stylesheet" href="login-style.css">
-</head>
 <body>
-  <form id="loginForm">
-    <div class="UserDiv">
-      <input name="username" placeholder="ユーザー名" class="username">
-    </div>
-    
-    <div class="PassDiv">
-      <input name="password" type="password" placeholder="パスワード" class="password">
-    </div>
-    
-    <div class="RoginBtnDiv">
-      <button class="button">ログイン</button>
-    </div>
+  <h1>ログイン</h1>
+  <form action="/login" method="post">
+    <input name="username" placeholder="ユーザー名" required />
+    <input type="password" name="password" placeholder="パスワード" required />
+    <button>ログイン</button>
   </form>
-
-<script>
-  document.getElementById("loginForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const data = {
-      username: e.target.username.value,
-      password: e.target.password.value
-    };
-    const res = await fetch("/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-    const json = await res.json();
-    if (json.ok) {
-      alert("ログイン成功！");
-      location.href = "/protected/mypage";
-    } else {
-      alert("ログイン失敗");
-    }
-  });
-</script>
-
-  </body>
+  <a href="/register.html">新規登録へ</a>
+</body>
 </html>
