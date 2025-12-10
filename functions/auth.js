@@ -3,6 +3,6 @@ export async function onRequestGet({ request }) {
   const username = cookie.match(/user=([^;]+)/)?.[1];
 
   return new Response(JSON.stringify({ username }), {
-    headers: { "Content-Type": "application/json" }
+    headers: { "Content-Type": "application/json" },
   });
 }
