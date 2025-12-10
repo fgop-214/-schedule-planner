@@ -10,15 +10,14 @@ export async function onRequestPost({ request, env }) {
   ).bind(username).first();
 
   if (!user) {
-    return new Response("ユーザー名またはパスワードが違います", { status: 401 });
+    return new Response("ユーザー名またはパスワードが間違っています", { status: 401 });
   }
 
   const ok = await verifyPassword(password, user.password_hash);
   if (!ok) {
-    return new Response("ユーザー名またはパスワードが違います", { status: 401 });
+    return new Response("ユーザー名またはパスワードが間違っています", { status: 401 });
   }
 
-  // Cookie 設定
   const headers = new Headers({
     "Set-Cookie": `user=${username}; Path=/; HttpOnly; Secure; SameSite=Strict`
   });
