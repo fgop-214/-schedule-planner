@@ -4,5 +4,5 @@ export async function onRequestGet() {
       "user=; Path=/; HttpOnly; Secure; Max-Age=0; SameSite=Strict"
   });
 
-  return Response.redirect("/public/index.html", { headers });
+  return Response.redirect("/index.html", { headers });
 }
