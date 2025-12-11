@@ -8,7 +8,7 @@ export const onRequest = async ({ request, next }) => {
 
   // 保護されたページにアクセスしているのに Cookie 無し → ログインへ
   if (protectedPaths.includes(url.pathname) && !username) {
-    return Response.redirect("/public/index.html");
+    return Response.redirect("/index.html");
   }
 
   return next();
