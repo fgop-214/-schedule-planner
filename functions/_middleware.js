@@ -1,15 +1,21 @@
 export const onRequest = async ({ request, next }) => {
   const url = new URL(request.url);
 
-  const protectedPaths = ['/public/dashboard.html', '/auth'];
+  const protectedPaths = ['/dashboard.html', '/auth']; // 保護するページ
 
   const cookie = request.headers.get("Cookie") || "";
   const username = cookie.match(/user=([^;]+)/)?.[1];
 
-  // 保護されたページにアクセスしているのに Cookie 無し → ログインへ
+  // 保護されたページにアクセスしているのにログインしていない場合
   if (protectedPaths.includes(url.pathname) && !username) {
-    return Response.redirect("/index.html");
+    return new Response(null, {
+      status: 302,
+      headers: {
+        "Location": "/index.html"
+      }
+    });
   }
 
+  // ログイン済みまたは保護対象外
   return next();
 };
