@@ -1,7 +1,7 @@
 export const onRequest = async ({ request, next }) => {
   const url = new URL(request.url);
 
-  const protectedPaths = ['/dashboard.html', '/auth'];
+  const protectedPaths = ['/public/dashboard.html', '/auth'];
 
   const cookie = request.headers.get("Cookie") || "";
   const username = cookie.match(/user=([^;]+)/)?.[1];
