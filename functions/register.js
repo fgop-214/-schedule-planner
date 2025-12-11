@@ -15,5 +15,5 @@ export async function onRequestPost({ request, env }) {
     return new Response("そのユーザー名は既に使われています", { status: 400 });
   }
 
-  return Response.redirect("/index.html");
+  return Response.redirect("/public/index.html");
 }
