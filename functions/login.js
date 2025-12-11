@@ -1,47 +1,34 @@
+import { verifyPassword } from './utils.js';
+
 export async function onRequestPost({ request, env }) {
   const form = await request.formData();
   const username = form.get("username");
   const password = form.get("password");
 
-  if (!username || !password) {
-    return new Response("Missing fields", { status: 400 });
-  }
-
-  // DB 確認
   const user = await env.DB.prepare(
-    "SELECT id, password FROM users WHERE username = ?"
+    "SELECT id, username, password_hash FROM users WHERE username = ?1"
   ).bind(username).first();
 
   if (!user) {
-    return new Response("User not found", { status: 401 });
+    return new Response("ユーザー名またはパスワードが間違っています", { status: 401 });
   }
 
-  // パスワードチェック（簡易版）
-  if (user.password !== password) {
-    return new Response("Invalid password", { status: 401 });
+  const ok = await verifyPassword(password, user.password_hash);
+  if (!ok) {
+    return new Response("ユーザー名またはパスワードが間違っています", { status: 401 });
   }
 
-  // セッション cookie を発行
-  const token = crypto.randomUUID();
+  // Cookie 発行
+  const headers = new Headers({
+    "Set-Cookie": `user=${username}; Path=/; HttpOnly; Secure; SameSite=Strict`
+  });
 
-  await env.DB
-    .prepare("INSERT INTO sessions (token, user_id) VALUES (?, ?)")
-    .bind(token, user.id)
-    .run();
-
-  // Cookie 付与
-  const headers = new Headers();
-  headers.append(
-    "Set-Cookie",
-    `session=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=86400`
-  );
-
-  // 正しい redirect
+  // 🔥 Cloudflare Pages Functions では Response.redirect はこう書く
   return new Response(null, {
-    status: 303,
+    status: 302,
     headers: {
-      ...Object.fromEntries(headers),
-      "Location": "/dashboard",
+      "Location": "/dashboard.html",
+      "Set-Cookie": `user=${username}; Path=/; HttpOnly; Secure; SameSite=Strict`
     }
   });
 }
