@@ -1,7 +1,7 @@
 export const onRequest = async ({ request, next }) => {
   const url = new URL(request.url);
 
-  const protectedPaths = ['/dashboard.html', '/auth']; // 保護するページ
+  const protectedPaths = ['/dashboard.html', '/dashboard', '/auth']; // 保護するページ
 
   const cookie = request.headers.get("Cookie") || "";
   const username = cookie.match(/user=([^;]+)/)?.[1];
