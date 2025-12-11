@@ -1,3 +1,3 @@
 # -schedule-planner
 
-スケプラだおー
+スケプラです
