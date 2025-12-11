@@ -22,5 +22,5 @@ export async function onRequestPost({ request, env }) {
     "Set-Cookie": `user=${username}; Path=/; HttpOnly; Secure; SameSite=Strict`
   });
 
-  return Response.redirect("/dashboard.html", { headers });
+  return Response.redirect("/dashboard.html", 302);
 }
