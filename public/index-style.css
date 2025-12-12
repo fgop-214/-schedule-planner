@@ -1,7 +1,7 @@
 #UserDiv{
   display: flex;
   justify-content: center; /* 横方向の中央 */
-  align-items: center;     /* 縦方向の中央 */
+  /* align-items: center;  /*   縦方向の中央 */
   height: 300px;
 }
 
@@ -14,7 +14,7 @@
 #PassDiv{
   display: flex;
   justify-content: center; /* 横方向の中央 */
-  align-items: center;     /* 縦方向の中央 */
+  /* align-items: center;     /* 縦方向の中央 */
   height: 400px;
 }
 
