@@ -3,7 +3,7 @@
   justify-content: center; /* 横方向の中央 */
   align-items: center;  /*   縦方向の中央 */
   position: relative;
-  top: 500px;
+  top: 100px;
   height: 50px;
 }
 
