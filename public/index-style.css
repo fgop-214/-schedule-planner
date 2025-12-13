@@ -4,7 +4,7 @@
   align-items: center;  /*   縦方向の中央 */
   text-align: center;
   margin: 55px;
-  height: 50px;
+  height: 200px;
 }
 
 .username{
@@ -19,7 +19,7 @@
   align-items: center;     /* 縦方向の中央 */
   text-align: center;
   margin: 55px;
-  height: 50px;
+  height: 200px;
 }
 
 .password{
