@@ -3,7 +3,7 @@
   justify-content: center; /* 横方向の中央 */
   align-items: center;  /*   縦方向の中央 */
   position: relative;
-  top: 300px;
+  top: 500px;
   height: 50px;
 }
 
@@ -11,8 +11,6 @@
   padding: 10px;
   width: 25%;
   font-size: 23px;
-  position: relative;
-  top: 50px;
 }
 
 .PassDiv{
@@ -28,6 +26,4 @@
   padding: 10px;
   width: 25%;
   font-size: 23px;
-  position: relative;
-  top: 50px;
 }
