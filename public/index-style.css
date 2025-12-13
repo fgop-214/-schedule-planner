@@ -2,24 +2,24 @@
   display: flex;
   justify-content: center; /* 横方向の中央 */
   align-items: middle;  /*   縦方向の中央 */
-  height: 80px;
+  height: 50px;
 }
 
 .username{
   padding: 12px;
-  width: 30%;
-  font-size: 25px;
+  width: 25%;
+  font-size: 18px;
 }
 
 .PassDiv{
   display: flex;
   justify-content: center; /* 横方向の中央 */
   align-items: middle;     /* 縦方向の中央 */
-  height: 80px;
+  height: 50px;
 }
 
 .password{
   padding: 12px;
-  width: 30%;
-  font-size: 25px;
+  width: 25%;
+  font-size: 18px;
 }
